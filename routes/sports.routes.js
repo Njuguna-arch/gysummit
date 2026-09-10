@@ -1,4 +1,3 @@
-// GY Summit 2026 — sports fixtures, results, entries
 const { Router } = require("express");
 const { z } = require("zod");
 const { SportsEvent, SportsEntry, SportsTeam, SportsTeamMember, DanceScore, User, Parish } = require("../models");
@@ -9,8 +8,6 @@ const { getForm } = require("../services/settingsService");
 
 const router = Router();
 
-// Sports > General > Enable Football/Volleyball/Dance — a real switch on
-// whether new fixtures can be created in that category, not just a label.
 async function assertCategoryEnabled(category) {
   const general = await getForm("generalSportsForm");
   const c = category.toLowerCase();
@@ -72,18 +69,13 @@ router.post(
   })
 );
 
-// Standard single-elimination bracket. The round ENUM (GROUP/QUARTER/
-// SEMI/FINAL) caps this at 8 teams — 16+ would need a ROUND_OF_16 value
-// added to the schema, so larger fields are rejected with a clear message
-// rather than silently mis-seeded.
 const BRACKET_SIZES = {
   2: { round: "FINAL", slots: ["F"] },
   4: { round: "SEMI", slots: ["SF1", "SF2"] },
   8: { round: "QUARTER", slots: ["QF1", "QF2", "QF3", "QF4"] },
 };
 const NEXT_ROUND = { QUARTER: "SEMI", SEMI: "FINAL" };
-// Which next-round slot (and home/away position within it) each
-// current-round slot feeds into.
+
 const ADVANCE_MAP = {
   QF1: { slot: "SF1", side: "teamHome" }, QF2: { slot: "SF1", side: "teamAway" },
   QF3: { slot: "SF2", side: "teamHome" }, QF4: { slot: "SF2", side: "teamAway" },
@@ -113,9 +105,8 @@ router.post(
     const start = new Date(body.firstRoundStartsAt);
     const created = [];
 
-    // Round 1 — real pairings from the given team list.
     for (let i = 0; i < slots.length; i++) {
-      const startsAt = new Date(start.getTime() + i * 20 * 60000); // stagger kickoffs 20 min apart
+      const startsAt = new Date(start.getTime() + i * 20 * 60000);
       const event = await SportsEvent.create({
         name: `${body.category} ${round === "QUARTER" ? "Quarter-Final" : round === "SEMI" ? "Semi-Final" : "Final"} — ${slots[i]}`,
         category: body.category,
@@ -130,8 +121,6 @@ router.post(
       created.push(event);
     }
 
-    // Placeholder fixtures for later rounds — filled in automatically by
-    // the PATCH /:id winner-advancement logic below as each match completes.
     let nextRound = NEXT_ROUND[round];
     let roundIndex = 1;
     while (nextRound) {
@@ -186,10 +175,6 @@ router.patch(
     if (!event) throw new ApiError(404, "Event not found");
     await event.update(body);
 
-    // Bracket winner advancement — if this result completes a QUARTER or
-    // SEMI fixture with a decisive score, drop the winning team's name
-    // into the placeholder slot in the next round created by
-    // /generate-bracket, instead of an admin having to copy it over by hand.
     if (
       event.status === "COMPLETED" &&
       event.bracketSlot &&
@@ -239,7 +224,6 @@ router.post(
   })
 );
 
-// ---- Teams (seeded per parish/category — never created from the app) ----
 
 router.get(
   "/teams",
@@ -360,8 +344,6 @@ router.delete(
   })
 );
 
-// ---- Standings (Football/Volleyball — points table from completed fixtures) ----
-
 router.get(
   "/standings",
   requireAuth,
@@ -402,7 +384,6 @@ router.get(
   })
 );
 
-// ---- Dance judging ----
 
 const danceScoreSchema = z.object({
   judgeName: z.string().min(2).max(120),
@@ -432,8 +413,6 @@ router.post(
   })
 );
 
-// Weighted total per Sports > Dance Scoring settings — defaults to equal
-// 20% weights (matching the admin UI's default sliders) if unset.
 function weightedTotal(score, weights) {
   const w = {
     theme: Number(weights.danceWeightTheme ?? 20),
@@ -465,8 +444,6 @@ router.get(
   })
 );
 
-// Ranks every Dance performance by average weighted judge score — the
-// leaderboard Dance Competition > "Winner Criteria" points toward.
 router.get(
   "/dance-leaderboard",
   requireAuth,

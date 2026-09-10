@@ -5,7 +5,6 @@ const { sequelize } = require("../config/database");
 const ROLES = ["SUPER_ADMIN", "ADMIN", "FINANCE_ADMIN", "ADMISSIONS_ADMIN", "SPORTS_ADMIN", "GALLERY_ADMIN", "PARTICIPANT"];
 const ADMIN_ROLES = ROLES.filter((r) => r !== "PARTICIPANT");
 
-// ---- Church structure (dynamic dropdowns on register.html) ----
 
 const Presbytery = sequelize.define("Presbytery", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -22,18 +21,12 @@ const Church = sequelize.define("Church", {
   name: { type: DataTypes.STRING(120), allowNull: false },
 });
 
-// ---- Core ----
-
 const User = sequelize.define("User", {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   fullName: { type: DataTypes.STRING(120), allowNull: false },
   email: { type: DataTypes.STRING(160), allowNull: false, unique: true, validate: { isEmail: true } },
   phone: { type: DataTypes.STRING(20), allowNull: false, unique: true },
   passwordHash: { type: DataTypes.STRING(100), allowNull: false },
-  // Defaults to true so admin-created accounts (seed script, admin.routes.js
-  // "create admin") stay usable without any extra step — /auth/register is
-  // the ONLY place that explicitly overrides this to false before sending
-  // an OTP, so self-registered participants are the only ones gated.
   isVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   otpHash: { type: DataTypes.STRING(64), allowNull: true },
   otpExpiresAt: { type: DataTypes.DATE, allowNull: true },
@@ -128,9 +121,6 @@ const Announcement = sequelize.define("Announcement", {
   title: { type: DataTypes.STRING(150), allowNull: false },
   body: { type: DataTypes.TEXT, allowNull: false },
   audience: { type: DataTypes.JSON, allowNull: false, defaultValue: ["PARTICIPANT"] },
-  // Narrows delivery further within the role(s) above — recorded here too
-  // (not just used transiently at send time) so the admin list can show
-  // who an announcement actually went to.
   parishId: { type: DataTypes.INTEGER, allowNull: true },
   sportsOnly: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   isPinned: { type: DataTypes.BOOLEAN, defaultValue: false },
@@ -181,11 +171,6 @@ const SportsEntry = sequelize.define("SportsEntry", {
   indexes: [{ unique: true, fields: ["sportsEventId", "userId"] }],
 });
 
-// A judge's scorecard for one dance performance (a SportsEvent with
-// category="Dance"). Criteria weights are read live from
-// danceScoringForm (Sports > Dance Scoring) when computing totals, rather
-// than baked in here, so changing the weights in the admin UI re-scores
-// every existing card automatically.
 const DanceScore = sequelize.define("DanceScore", {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   judgeName: { type: DataTypes.STRING(120), allowNull: false },
@@ -245,8 +230,6 @@ const SystemSetting = sequelize.define("SystemSetting", {
   value: { type: DataTypes.JSON, allowNull: false },
 }, { timestamps: true });
 
-// A private, low-noise inbox for direct admin<->participant messages
-// (covers the "messages" table from the project brief).
 const Message = sequelize.define("Message", {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   subject: { type: DataTypes.STRING(150), allowNull: false },
@@ -254,7 +237,6 @@ const Message = sequelize.define("Message", {
   isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
-// ---- Associations ----
 
 Presbytery.hasMany(Parish, { foreignKey: "presbyteryId" });
 Parish.belongsTo(Presbytery, { foreignKey: "presbyteryId" });

@@ -1,4 +1,3 @@
-// GY Summit 2026 — presbytery/parish/church dropdown data
 const { Router } = require("express");
 const { z } = require("zod");
 const { Presbytery, Parish, Church } = require("../models");
@@ -31,13 +30,12 @@ router.get(
   "/churches",
   asyncHandler(async (req, res) => {
     const parishId = req.query.parishId;
-    if (!parishId) return res.json({ items: [] }); // churches load only after a parish is picked
+    if (!parishId) return res.json({ items: [] });
     const items = await Church.findAll({ where: { parishId }, order: [["name", "ASC"]] });
     res.json({ items });
   })
 );
 
-// ---- Admin management of the structure ----
 
 router.post(
   "/parishes",
@@ -72,9 +70,6 @@ router.get(
       order: [["name", "ASC"]],
     });
 
-    // Compute real standings once from every completed fixture, then fold
-    // per-parish (a parish can field a team in each of Football/Volleyball/
-    // Dance, so its "standing" is the sum across all of them).
     const completedEvents = await SportsEvent.findAll({
       where: { status: "COMPLETED" },
       attributes: ["teamHome", "teamAway", "scoreHome", "scoreAway"],
@@ -144,10 +139,6 @@ router.patch(
     await parish.save();
 
     if (oldName !== name) {
-      // Keep every sports team's display name and any fixtures that
-      // reference the old name (free-text teamHome/teamAway) in sync —
-      // otherwise standings/bracket lookups (which match by name) would
-      // silently break after a rename.
       const teams = await SportsTeam.findAll({ where: { parishId: parish.id } });
       for (const team of teams) {
         const newTeamName = team.name.replace(oldName, name);
