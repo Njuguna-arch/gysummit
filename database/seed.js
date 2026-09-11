@@ -3,17 +3,69 @@ const bcrypt = require("bcryptjs");
 const { sequelize, Presbytery, Parish, Church, User, SportsTeam } = require("../models");
 
 const PARISH_CHURCHES = {
-  "Kagaa Parish": ["Kagaa Church"],
-  "Githiga Parish": ["Githiga Church", "Kahuguini Church"],
-  "Gathanji Parish": ["Gathanji Church", "Riabai Church"],
-  "Gathangari Parish": ["Gathangari Church", "Gathiruini Church"],
-  "Riara Ridge Parish": ["Riara Ridge Church"],
-  "Matuguta Parish": ["Matuguta Church"],
-  "Githunguri Parish": ["Githunguri Church", "Gitwe Church"],
-  "Kahunira Parish": ["Kahunira Church"],
-  "Gathaithi Parish": ["Gathaithi Church"],
-  "Kamburu Parish": ["Kamburu Church"],
-  "Karuthi Parish": ["Karuthi Church"],
+  "PCEA Matuguta Parish": [
+    "PCEA Matuguta",
+    "PCEA Miumia Ngatho",
+    "PCEA Gituamba"
+  ],
+  "PCEA Gathangari Parish": [
+    "PCEA Gathangari",
+    "PCEA Waingere",
+    "PCEA Mathanja"
+  ],
+  "PCEA Kamburu Parish": [
+    "PCEA Kamburu",
+    "PCEA Matimbei",
+    "PCEA Nyanjogu",
+    "PCEA Ngamba",
+    "PCEA Emmanuel",
+    "PCEA Neema"
+  ],
+  "PCEA Gathaithi Parish": [
+    "PCEA Gathaithi",
+    "PCEA Ikinu",
+    "PCEA Kamondo"
+  ],
+  "PCEA Karuthi Parish": [
+    "PCEA Karuthi",
+    "PCEA Gatitu",
+    "PCEA Ihiga"
+  ],
+  "PCEA Kahunira Parish": [
+    "PCEA Kahunira",
+    "PCEA Gitwe",
+    "PCEA Ngeteti"
+  ],
+  "PCEA Gathanje Parish": [
+    "PCEA GGM",
+    "PCEA Gathanje"
+  ],
+  "PCEA Kagaa Parish": [
+    "PCEA Kibathithi",
+    "PCEA St. Stephen",
+    "PCEA Iriani",
+    "PCEA Hoswel",
+    "PCEA Musa Ndirangu"
+  ],
+  "PCEA Githiga Parish": [
+    "PCEA Githiga",
+    "PCEA Gatina",
+    "PCEA GGM",
+    "PCEA Nathan Kamau",
+    "PCEA Township",
+    "PCEA Dr. George Kamau"
+  ],
+  "PCEA Githunguri Parish": [
+    "PCEA Rev. Ayub Kinyua",
+    "PCEA Magomano"
+  ],
+  "PCEA Riara Parish": [
+    "PCEA Riara Ridge",
+    "PCEA Immanuel Church",
+    "PCEA Itungi",
+    "PCEA Broomhill",
+    "PCEA Muna",
+  ]
 };
 const PARISHES = Object.keys(PARISH_CHURCHES);
 
